@@ -30,9 +30,9 @@ def escapeTime(xmin,xmax,ymin,ymax,width,height,maxiters):
 
 @jit	
 def draw(screen,xmin,xmax,ymin,ymax,img_width,img_height,maxiters):
-	print("Calculating...")
+	#print("Calculating...")
 	x,y,z = escapeTime(xmin,xmax,ymin,ymax,img_width,img_height,maxiters)
-	print("Calculated")
+	#print("Calculated")
 	
 	mapping = []
 	r = random.randrange(0,255-(img_height%255))
@@ -72,9 +72,9 @@ def main(screen, xmin, xmax, ymin, ymax, img_width, img_height, maxiters):
 		for e in events:
 			if e.type == pygame.KEYDOWN:
 				if e.key == pygame.K_SPACE:
-					print("Drawing...")
+					#print("Drawing...")
 					draw(screen, xmin, xmax, ymin, ymax, img_width, img_height, maxiters)
-					print("Drawn")
+					#print("Drawn")
 				if e.key == pygame.K_ESCAPE:
 					quit = True
 					print("Quitting")
