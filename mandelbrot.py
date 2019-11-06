@@ -70,6 +70,9 @@ def main(screen, xmin, xmax, ymin, ymax, img_width, img_height, maxiters):
 		time.sleep(1)
 		events = pygame.event.get()
 		for e in events:
+			if e.type == pygame.QUIT:
+				quit = True
+				print("Quitting")
 			if e.type == pygame.KEYDOWN:
 				if e.key == pygame.K_SPACE:
 					#print("Drawing...")
