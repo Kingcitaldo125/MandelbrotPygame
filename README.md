@@ -1,6 +1,6 @@
 # MandelbrotPygame
 
-Mandelbrot set visualizer done in Python and [PyGame](https://www.pygame.org/docs/).
+Mandelbrot set visualizer done in Python, [PyGame](https://www.pygame.org/docs/), and [PIL](https://pillow.readthedocs.io/en/stable/index.html).
 
 ## Running
 
@@ -22,8 +22,8 @@ Run `python mandelbrot.py` to start the simulation.
 
 ## References
 
-[COS 126 Mandelbrot Set](https://www.cs.princeton.edu/courses/archive/spring2000/cs126/assignments/mandel.html)
-[Plotting algorithms for the Mandelbrot set](https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set#)
+- [COS 126 Mandelbrot Set](https://www.cs.princeton.edu/courses/archive/spring2000/cs126/assignments/mandel.html)
+- [Plotting algorithms for the Mandelbrot set](https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set#)
 
 ## License
 
