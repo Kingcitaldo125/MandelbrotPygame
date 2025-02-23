@@ -1,6 +1,8 @@
 import cmath
 import pygame
+import numpy as np
 
+from PIL import Image, ImageOps
 from random import randrange as rr
 from time import sleep
 
@@ -18,12 +20,27 @@ y_zoom = 1.0
 #y_zoom = 10.0
 redraw = True
 
+def create_image(screen, filename="out.png"):
+	global winx, winy
+
+	img = Image.new("RGB", (winx, winy))
+
+	colors = []
+	for i in range(winx):
+		for j in range(winy):
+			clr = screen.get_at((i,j))
+			colors.append(tuple([c for c in clr]))
+
+	img.putdata(colors)
+	img = ImageOps.mirror(img)
+	img.save(filename)
+
 def scale(i, mp):
 	if mp == 0:
 		return i
 	return (i - mp) / mp
 
-def update(mid,debug=False):
+def update(screen, mid, debug=False):
 	global done, x_zoom, y_zoom, x_scale, y_scale, redraw
 	
 	scaling_factor = 75
@@ -57,16 +74,13 @@ def update(mid,debug=False):
 
 				x_zoom_factor = abs(diffvec.x) * zoom_factor
 				y_zoom_factor = abs(diffvec.y) * zoom_factor
-				if e.button == 4: # zoom in
-					x_zoom_factor = abs(diffvec.x) * zoom_factor
-					y_zoom_factor = abs(diffvec.y) * zoom_factor
-
+				if e.button == 4: # zoom in (mousewheel)
 					x_zoom += x_zoom_factor
 					y_zoom += y_zoom_factor
 
 					x_scale += diffvec.x / quarter_scaling_factor
 					y_scale += diffvec.y / eighth_scaling_factor
-				elif e.button == 5: # zoom out
+				elif e.button == 5: # zoom out (mousewheel)
 					x_zoom -= x_zoom_factor
 					y_zoom -= y_zoom_factor
 
@@ -81,7 +95,9 @@ def update(mid,debug=False):
 					print("")
 				redraw = True
 		elif e.type == pygame.KEYDOWN:
-			if e.key == pygame.K_SPACE:
+			if e.key == pygame.K_RETURN:
+				create_image(screen)
+			elif e.key == pygame.K_SPACE:
 				x_scale = -1.0
 				y_scale = 0.0
 				x_zoom = 1.0
@@ -89,7 +105,7 @@ def update(mid,debug=False):
 				if debug:
 					print("reset")
 				redraw = True
-			if e.key == pygame.K_ESCAPE:
+			elif e.key == pygame.K_ESCAPE:
 				done = True
 				break
 
@@ -103,7 +119,7 @@ def render(screen, midpoint, palette, max_iters, debug=False):
 		lx_scale = x_scale
 		ly_scale = y_scale
 		for i in range(winx):
-			update(midpoint,debug)
+			update(screen, midpoint, debug)
 			if done or redraw:
 				break
 			for j in range(winy):
@@ -151,7 +167,7 @@ def main(wx,wy):
 
 	done = False
 	while not done:
-		update(midpoint)
+		update(screen, midpoint)
 		if redraw:
 			#print("Rendering...")
 			render(screen, midpoint, palette, max_iters)
@@ -162,4 +178,5 @@ def main(wx,wy):
 
 	pygame.display.quit()
 
-main(300,300)
+if __name__ == "__main__":
+	main(400,400)
