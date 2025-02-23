@@ -1,114 +1,112 @@
-from numba import jit
-import numpy as np
+import cmath
 import pygame
-import random
-import time
 
-@jit
-def mandelbrot(creal,cimag,maxiter):
-	real = creal
-	imag = cimag
-	for n in range(maxiter):
-		real2 = real*real
-		imag2 = imag*imag
-		if real2+imag2 > 4.0:
-			return n
-		imag = 2 * real * imag + cimag
-		real = real2 - imag2 + creal
-	return 0
+from random import randrange as rr
+from time import sleep
 
-@jit
-def escapeTime(xmin,xmax,ymin,ymax,width,height,maxiters):
-	r1 = np.linspace(xmin,xmax,width)
-	r2 = np.linspace(ymin,ymax,height)
-	n3 = np.empty((width,height))
-	for i in range(width):
-		for j in range(height):
-			n3[i,j] = mandelbrot(r1[i],r2[j],maxiters)
-	
-	return (r1,r2,n3)
+done = False
+winx = 0
+winy = 0
+x_scale = 0.0
+y_scale = 0.0
 
-@jit	
-def draw(screen,xmin,xmax,ymin,ymax,img_width,img_height,maxiters):
-	#print("Calculating...")
-	x,y,z = escapeTime(xmin,xmax,ymin,ymax,img_width,img_height,maxiters)
-	#print("Calculated")
-	
-	mapping = []
-	r = random.randrange(0,255-(img_height%255))
-	g = random.randrange(0,255-(img_height%255))
-	b = random.randrange(0,255-(img_height%255))
-	hue = 10
-	for i in range(img_height):
-		#tupp = (random.randrange(0,255),random.randrange(0,255),random.randrange(0,255))
-		tupp = (r,g,b)
-		mapping.append(tupp)
-		r = (r+hue) % 255
-		#g = (g+hue) % 255
-		#b = (b+hue) % 255
-	
-	row = 0
-	col = 0
-	#print(z)
-	for zz in z:
-		for zzz in zz:
-			color = (0,0,0)
-			if zzz <= 0.0:
-				color = (0,0,0)
-			else:
-				colorIdx = int(zzz) % len(mapping)
-				color = mapping[colorIdx] if colorIdx>=0 else (0,0,0)
-			screen.set_at((row,col),color)
-			col += 1
-		col = 0
-		row += 1
+def scale(i, mp):
+	return (i - mp) / mp
 
-@jit
-def main(screen, xmin, xmax, ymin, ymax, img_width, img_height, maxiters):
-	quit = False
-	while not quit:
-		time.sleep(1)
-		events = pygame.event.get()
-		for e in events:
-			if e.type == pygame.QUIT:
-				quit = True
-				print("Quitting")
-			if e.type == pygame.KEYDOWN:
-				if e.key == pygame.K_SPACE:
-					#print("Drawing...")
-					draw(screen, xmin, xmax, ymin, ymax, img_width, img_height, maxiters)
-					#print("Drawn")
-				if e.key == pygame.K_ESCAPE:
-					quit = True
-					print("Quitting")
-		pygame.display.flip()
-	pygame.display.quit()
-	
-pygame.display.init()
-img_width = 400
-img_height = 400
-#img_width = 20
-#img_height = 20
-screen = pygame.display.set_mode((img_width,img_height))
+def check_events():
+	global done, x_scale, y_scale
+	events = pygame.event.get()
+	retv = None
 
-if __name__ == "__main__":
+	for e in events:
+		if e.type == pygame.QUIT:
+			done = True
+			break
+
+		if e.type == pygame.MOUSEBUTTONDOWN:
+			retv = pygame.mouse.get_pos()
+			print("mousedown")
+		elif e.type == pygame.KEYDOWN:
+			if e.key == pygame.K_SPACE:
+				x_scale = 0.0
+				y_scale = 0.0
+				print("reset")
+				retv = (winx//2, winy//2)
+			if e.key == pygame.K_ESCAPE:
+				done = True
+				break
+
+	return retv
+
+def render(screen, midpointx, midpointy):
+	global winx, winy, x_scale, y_scale
 	screen.fill((0,0,0))
+
+	# mandelbrot x scale (-2.00, 0.47)
+	# mandelbrot y scale (-1.12, 1.12)
+	max_iters = 1000
+	palette = {max_iters:(0,0,0)}
+	for i in range(max_iters):
+		r1 = rr(0,255)
+		r2 = rr(0,255)
+		r3 = rr(0,255)
+		palette[i] = (min(255,i + r1), min(255,i + r2), min(255,i + r3))
+
+	for i in range(winx):
+		if done:
+			break
+		for j in range(winy):
+			if done:
+				break
+
+			x0 = scale(i, midpointx) + x_scale
+			y0 = scale(j, midpointy) + y_scale
+			x = 0.0
+			y = 0.0
+			x2 = 0
+			y2 = 0
+			iter = 0
+			while (x2 + y2 <= 4 and iter < max_iters):
+				y = 2 * x * y + y0
+				x = x2 - y2 + x0
+				x2 = x * x
+				y2 = y * y
+				iter += 1
+
+			# if iter == max_iters, it's in the mandelbrot set
+			screen.set_at((i,j), palette[iter])
+			pygame.display.flip()
+
+	print("Done rendering.")
+	pygame.display.flip()
+
+def main(wx,wy):
+	global done, winx, winy
+	winx = wx
+	winy = wy
 	
-	xStart = -2.0
-	xStop = 0.5
-	yStart = -1.25
-	yStop = 1.25
-	xdecrease = 0.3743850
-	ydecrease = 0.0520424
-	
-	xmin = -2.0
-	#xmin = -0.74877
-	xmax = 0.5
-	#xmax = -0.74872
-	ymin = -1.25
-	#ymin = -1.25*ydecrease
-	ymax = 1.25
-	#ymax = -0.065013
-	maxiters = 250
-	
-	main(screen, xmin, xmax, ymin, ymax, img_width, img_height, maxiters)
+	if winx == 0 or winy == 0:
+		print("Need window values > 0")
+		return
+
+	pygame.display.init()
+	screen = pygame.display.set_mode((winx, winy))
+	midpointx = winx // 2
+	midpointy = winy // 2
+
+	render(screen, midpointx, midpointy)
+	sleep(5)
+	done = True
+	while not done:
+		mget = check_events()
+		if mget:
+			posx = mget[0]
+			posy = mget[1]
+			xscale = scale(posx, midpointx)
+			yscale = scale(posy, midpointy)
+			render(screen, winx, winy, xscale, yscale)
+
+		sleep(0.25)
+	pygame.display.quit()
+
+main(400,400)
