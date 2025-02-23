@@ -4,6 +4,10 @@ Mandelbrot set visualizer done in Python and [PyGame](https://www.pygame.org/doc
 
 ## Running
 
+### Installing dependencies
+
+Run `pip3 install -r requirements.txt` to install the dependencies.
+
 ### Starting
 
 Run `python mandelbrot.py` to start the simulation.
