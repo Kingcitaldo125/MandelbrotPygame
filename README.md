@@ -1,12 +1,12 @@
 # MandelbrotPygame
 
-Mandelbrot set visualizer done in Python, [PyGame](https://www.pygame.org/docs/), and [PIL](https://pillow.readthedocs.io/en/stable/index.html).
+Mandelbrot set visualizer done in Python, [PyGame](https://www.pygame.org/docs/), and [Pillow](https://pillow.readthedocs.io/en/stable/index.html).
 
 ## Running
 
 ### Installing dependencies
 
-Run `pip3 install -r requirements.txt` to install the dependencies.
+Run `pip install -r requirements.txt` to install the dependencies.
 
 ### Starting
 
