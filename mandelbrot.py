@@ -4,7 +4,7 @@ import numpy as np
 
 from PIL import Image, ImageOps
 from random import randrange as rr
-from time import sleep
+from time import sleep, time
 
 done = False
 winx = 0
@@ -33,9 +33,13 @@ def create_image(screen, filename="out.png"):
 
 	img.putdata(colors)
 	img = ImageOps.mirror(img)
-	img.save(filename)
+
+	# Make output filename unique
+	fname,suffix = filename.split('.')
+	img.save(fname + '_' + str(int(time())) + '.' + suffix)
 
 def scale(i, mp):
+	# Handle scaling pygame (x,y) coordinates down to the 0..1 range
 	if mp == 0:
 		return i
 	return (i - mp) / mp
@@ -54,6 +58,7 @@ def update(screen, mid, debug=False):
 			done = True
 			break
 
+		# Handle zoom/move events (user inputs)
 		if e.type == pygame.MOUSEBUTTONDOWN:
 			if e.button == 4 or e.button == 5:
 				pos = pygame.mouse.get_pos()
@@ -111,6 +116,8 @@ def update(screen, mid, debug=False):
 
 def render(screen, midpoint, palette, max_iters, debug=False):
 	global winx, winy, x_scale, y_scale, x_zoom, y_zoom, redraw
+	# While we were given a re-draw request, run the escape-time algorithm
+	# described in https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set#
 	while redraw:
 		redraw = False
 		screen.fill((0,0,0))
@@ -123,6 +130,7 @@ def render(screen, midpoint, palette, max_iters, debug=False):
 			if done or redraw:
 				break
 			for j in range(winy):
+				# Handle calculation of the output color for the (i,j) pixel
 				x0 = scale(i, midpoint.x * lxzoom) + lx_scale
 				y0 = scale(j, midpoint.y * lyzoom) + ly_scale
 				x = 0.0
@@ -154,7 +162,7 @@ def main(wx,wy):
 	pygame.display.init()
 	screen = pygame.display.set_mode((winx, winy))
 	midpoint = pygame.math.Vector2(winx//2, winy//2)
-
+ 
 	# Mandelbrot x scale (-2.00, 0.47)
 	# Mandelbrot y scale (-1.12, 1.12)
 	max_iters = 1000
